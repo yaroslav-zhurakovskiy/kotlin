@@ -571,7 +571,7 @@ fun createStaticFunctionWithReceivers(
     typeParametersFromContext: List<IrTypeParameter> = listOf()
 ): IrSimpleFunction {
     val descriptor = (oldFunction.descriptor as? DescriptorWithContainerSource)?.let {
-        WrappedFunctionDescriptorWithContainerSource(it.containerSource)
+        WrappedFunctionDescriptorWithContainerSource()
     } ?: WrappedSimpleFunctionDescriptor(Annotations.EMPTY, oldFunction.descriptor.source)
     return IrFunctionImpl(
         oldFunction.startOffset, oldFunction.endOffset,
@@ -587,7 +587,8 @@ fun createStaticFunctionWithReceivers(
         isSuspend = oldFunction.isSuspend,
         isExpect = oldFunction.isExpect,
         isFakeOverride = isFakeOverride,
-        isOperator = oldFunction is IrSimpleFunction && oldFunction.isOperator
+        isOperator = oldFunction is IrSimpleFunction && oldFunction.isOperator,
+        containerSource = oldFunction.containerSource
     ).apply {
         descriptor.bind(this)
         parent = irParent
