@@ -23,10 +23,6 @@ import org.jetbrains.kotlin.fir.symbols.impl.FirNamedFunctionSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirPropertySymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirVariableSymbol
 import org.jetbrains.kotlin.ir.declarations.*
-import org.jetbrains.kotlin.ir.declarations.impl.IrFunctionImpl
-import org.jetbrains.kotlin.ir.declarations.impl.IrPropertyImpl
-import org.jetbrains.kotlin.ir.declarations.impl.IrTypeParameterImpl
-import org.jetbrains.kotlin.ir.declarations.impl.IrValueParameterImpl
 import org.jetbrains.kotlin.ir.descriptors.WrappedPropertyDescriptor
 import org.jetbrains.kotlin.ir.descriptors.WrappedSimpleFunctionDescriptor
 import org.jetbrains.kotlin.ir.descriptors.WrappedTypeParameterDescriptor
@@ -115,7 +111,7 @@ internal class DelegatedMemberGenerator(
         } == true
         lateinit var irTypeSubstitutor: IrTypeSubstitutor
         val delegateFunction = symbolTable.declareSimpleFunction(descriptor) { symbol ->
-            IrFunctionImpl(
+            declarationFactory.createFunction(
                 startOffset,
                 endOffset,
                 origin,
@@ -145,7 +141,7 @@ internal class DelegatedMemberGenerator(
                         typeParameters += symbolTable.declareScopedTypeParameter(
                             startOffset, endOffset, origin, parameterDescriptor
                         ) { symbol ->
-                            IrTypeParameterImpl(
+                            declarationFactory.createTypeParameter(
                                 startOffset,
                                 endOffset,
                                 origin,
@@ -175,7 +171,7 @@ internal class DelegatedMemberGenerator(
                     valueParameters += symbolTable.declareValueParameter(
                         startOffset, endOffset, origin, parameterDescriptor, substedType
                     ) { symbol ->
-                        IrValueParameterImpl(
+                        declarationFactory.createValueParameter(
                             startOffset, endOffset, origin, symbol,
                             valueParameter.name, valueParameter.index, substedType,
                             null, valueParameter.isCrossinline, valueParameter.isNoinline
@@ -281,7 +277,7 @@ internal class DelegatedMemberGenerator(
             startOffset, endOffset,
             IrDeclarationOrigin.DELEGATED_MEMBER, descriptor, superProperty.isDelegated
         ) { symbol ->
-            IrPropertyImpl(
+            declarationFactory.createProperty(
                 startOffset, endOffset, IrDeclarationOrigin.DELEGATED_MEMBER, symbol,
                 superProperty.name, superProperty.visibility,
                 modality,
