@@ -221,6 +221,16 @@ object NodeConfigurator : AbstractFieldConfigurator<FirTreeBuilder>(FirTreeBuild
             +field("conversionTypeRef", typeRef)
         }
 
+        assignmentOperatorStatement.configure {
+            +field("operation", operationType)
+            +field("leftArgument", expression).withTransform()
+            +field("rightArgument", expression).withTransform()
+        }
+
+        equalityOperatorCall.configure {
+            +field("operation", operationType)
+        }
+
         whenBranch.configure {
             +field("condition", expression).withTransform()
             +field("result", block).withTransform()
