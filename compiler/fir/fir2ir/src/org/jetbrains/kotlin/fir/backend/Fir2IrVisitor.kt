@@ -119,7 +119,7 @@ class Fir2IrVisitor(
                     memberGenerator.convertClassContent(correspondingClass, anonymousObject)
                 }
                 val constructor = correspondingClass.constructors.first()
-                irEnumEntry.initializerExpression = IrExpressionBodyImpl(
+                irEnumEntry.initializerExpression = declarationFactory.createExpressionBody(
                     IrEnumConstructorCallImpl(
                         startOffset, endOffset, enumEntry.returnTypeRef.toIrType(),
                         constructor.symbol,
@@ -136,7 +136,9 @@ class Fir2IrVisitor(
             val delegatedConstructor = primaryConstructor?.delegatedConstructor
             if (delegatedConstructor != null) {
                 with(memberGenerator) {
-                    irEnumEntry.initializerExpression = IrExpressionBodyImpl(delegatedConstructor.toIrDelegatingConstructorCall())
+                    irEnumEntry.initializerExpression = declarationFactory.createExpressionBody(
+                        delegatedConstructor.toIrDelegatingConstructorCall()
+                    )
                 }
             }
         }
