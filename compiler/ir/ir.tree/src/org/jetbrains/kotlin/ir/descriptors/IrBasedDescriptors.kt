@@ -90,7 +90,16 @@ abstract class IrBasedDeclarationDescriptor<T : IrDeclaration>(val owner: T) : D
     }
 }
 
-fun IrDeclaration.toIrBasedDescriptor(): DeclarationDescriptor = when {
+fun IrDeclaration.toIrBasedDescriptor(): DeclarationDescriptor = when (this) {
+    is IrValueParameter -> toIrBasedDescriptor()
+    is IrTypeParameter -> toIrBasedDescriptor()
+    is IrVariable -> toIrBasedDescriptor()
+    is IrLocalDelegatedProperty -> toIrBasedDescriptor()
+    is IrFunction -> toIrBasedDescriptor()
+    is IrClass -> toIrBasedDescriptor()
+    is IrEnumEntry -> toIrBasedDescriptor()
+    is IrProperty -> toIrBasedDescriptor()
+    is IrField -> toIrBasedDescriptor()
     else -> error("Unknown declaration kind")
 }
 
@@ -224,6 +233,12 @@ open class IrBasedReceiverParameterDescriptor(
     }
 }
 
+fun IrValueParameter.toIrBasedDescriptor() =
+    if (index < 0)
+        IrBasedReceiverParameterDescriptor(this)
+    else
+        IrBasedValueParameterDescriptor(this)
+
 @OptIn(ObsoleteDescriptorBasedAPI::class)
 open class IrBasedTypeParameterDescriptor(
     owner: IrTypeParameter,
@@ -290,6 +305,8 @@ open class IrBasedTypeParameterDescriptor(
 
 }
 
+fun IrTypeParameter.toIrBasedDescriptor() = IrBasedTypeParameterDescriptor(this)
+
 @OptIn(ObsoleteDescriptorBasedAPI::class)
 open class IrBasedVariableDescriptor(
     owner: IrVariable,
@@ -326,6 +343,8 @@ open class IrBasedVariableDescriptor(
     }
 }
 
+fun IrVariable.toIrBasedDescriptor() = IrBasedVariableDescriptor(this)
+
 @OptIn(ObsoleteDescriptorBasedAPI::class)
 open class IrBasedVariableDescriptorWithAccessor(owner: IrLocalDelegatedProperty) : VariableDescriptorWithAccessors,
     IrBasedCallableDescriptor<IrLocalDelegatedProperty>(owner, SourceElement.NO_SOURCE) {
@@ -355,6 +374,8 @@ open class IrBasedVariableDescriptorWithAccessor(owner: IrLocalDelegatedProperty
         get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
     override val isDelegated: Boolean = true
 }
+
+fun IrLocalDelegatedProperty.toIrBasedDescriptor() = IrBasedVariableDescriptorWithAccessor(this)
 
 @OptIn(ObsoleteDescriptorBasedAPI::class)
 open class IrBasedSimpleFunctionDescriptor(
@@ -436,9 +457,18 @@ open class IrBasedSimpleFunctionDescriptor(
 
 @OptIn(ObsoleteDescriptorBasedAPI::class)
 class IrBasedFunctionDescriptorWithContainerSource(
-    owner: IrSimpleFunction,
-    override val containerSource: DeserializedContainerSource?
-) : IrBasedSimpleFunctionDescriptor(owner), DescriptorWithContainerSource
+    owner: IrSimpleFunction
+) : IrBasedSimpleFunctionDescriptor(owner), DescriptorWithContainerSource {
+    override val containerSource: DeserializedContainerSource? get() = owner.containerSource
+}
+
+@OptIn(ObsoleteDescriptorBasedAPI::class)
+fun IrSimpleFunction.toIrBasedDescriptor() = when {
+    descriptor is DescriptorWithContainerSource -> IrBasedFunctionDescriptorWithContainerSource(this)
+    isGetter -> IrBasedPropertyGetterDescriptor(this)
+    isSetter -> IrBasedPropertySetterDescriptor(this)
+    else -> IrBasedSimpleFunctionDescriptor(this)
+}
 
 @OptIn(ObsoleteDescriptorBasedAPI::class)
 open class IrBasedClassConstructorDescriptor(
@@ -533,6 +563,14 @@ open class IrBasedClassConstructorDescriptor(
     override fun acceptVoid(visitor: DeclarationDescriptorVisitor<Void, Void>?) {
         visitor!!.visitConstructorDescriptor(this, null)
     }
+}
+
+fun IrConstructor.toIrBasedDescriptor() = IrBasedClassConstructorDescriptor(this)
+
+fun IrFunction.toIrBasedDescriptor(): FunctionDescriptor = when(this) {
+    is IrSimpleFunction -> toIrBasedDescriptor()
+    is IrConstructor -> toIrBasedDescriptor()
+    else -> error("Unknown function kind")
 }
 
 @OptIn(ObsoleteDescriptorBasedAPI::class)
@@ -632,6 +670,8 @@ open class IrBasedClassDescriptor(
     }
 }
 
+fun IrClass.toIrBasedDescriptor() = IrBasedClassDescriptor(this)
+
 @OptIn(ObsoleteDescriptorBasedAPI::class)
 open class IrBasedEnumEntryDescriptor(
     owner: IrEnumEntry,
@@ -728,6 +768,8 @@ open class IrBasedEnumEntryDescriptor(
 
     override fun isDefinitelyNotSamInterface() = true
 }
+
+fun IrEnumEntry.toIrBasedDescriptor() = IrBasedEnumEntryDescriptor(this)
 
 @OptIn(ObsoleteDescriptorBasedAPI::class)
 open class IrBasedPropertyDescriptor(
@@ -840,6 +882,9 @@ class IrBasedPropertyDescriptorWithContainerSource(
     override var containerSource: DeserializedContainerSource?
 ) : IrBasedPropertyDescriptor(owner), DescriptorWithContainerSource
 
+// !!!!!! Check whether IrBasedPropertyDescriptorWithContainerSource is ever needed
+fun IrProperty.toIrBasedDescriptor() = IrBasedPropertyDescriptor(this)
+
 @OptIn(ObsoleteDescriptorBasedAPI::class)
 abstract class IrBasedPropertyAccessorDescriptor(
     owner: IrSimpleFunction,
@@ -856,14 +901,14 @@ abstract class IrBasedPropertyAccessorDescriptor(
     override val correspondingVariable: VariableDescriptorWithAccessors get() = correspondingProperty
 }
 
-class IrBasedPropertyGetterDescriptor(owner: IrSimpleFunction, sourceElement: SourceElement) :
+class IrBasedPropertyGetterDescriptor(owner: IrSimpleFunction, sourceElement: SourceElement = SourceElement.NO_SOURCE) :
     IrBasedPropertyAccessorDescriptor(owner, sourceElement), PropertyGetterDescriptor {
     override fun getOverriddenDescriptors() = super.getOverriddenDescriptors().map { it as PropertyGetterDescriptor }
 
     override fun getOriginal(): IrBasedPropertyGetterDescriptor = this
 }
 
-class IrBasedPropertySetterDescriptor(owner: IrSimpleFunction, sourceElement: SourceElement) :
+class IrBasedPropertySetterDescriptor(owner: IrSimpleFunction, sourceElement: SourceElement = SourceElement.NO_SOURCE) :
     IrBasedPropertyAccessorDescriptor(owner, sourceElement), PropertySetterDescriptor {
     override fun getOverriddenDescriptors() = super.getOverriddenDescriptors().map { it as PropertySetterDescriptor }
 
@@ -1030,6 +1075,8 @@ open class IrBasedFieldDescriptor(
 
     override fun <V : Any?> getUserData(key: CallableDescriptor.UserDataKey<V>?): V? = null
 }
+
+fun IrField.toIrBasedDescriptor() = IrBasedFieldDescriptor(this)
 
 @OptIn(ObsoleteDescriptorBasedAPI::class)
 private fun getContainingDeclaration(declaration: IrDeclarationWithName): DeclarationDescriptor {
