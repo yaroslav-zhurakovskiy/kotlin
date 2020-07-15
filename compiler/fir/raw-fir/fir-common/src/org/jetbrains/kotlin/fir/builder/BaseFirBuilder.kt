@@ -25,7 +25,6 @@ import org.jetbrains.kotlin.fir.types.*
 import org.jetbrains.kotlin.fir.types.builder.*
 import org.jetbrains.kotlin.fir.types.impl.ConeClassLikeTypeImpl
 import org.jetbrains.kotlin.fir.types.impl.ConeTypeParameterTypeImpl
-import org.jetbrains.kotlin.fir.types.impl.FirResolvedTypeRefImpl
 import org.jetbrains.kotlin.lexer.KtTokens.CLOSING_QUOTE
 import org.jetbrains.kotlin.lexer.KtTokens.OPEN_QUOTE
 import org.jetbrains.kotlin.name.FqName
@@ -531,19 +530,17 @@ abstract class BaseFirBuilder<T>(val baseSession: FirSession, val context: Conte
         }
 
         if (operation in FirOperation.ASSIGNMENTS && operation != FirOperation.ASSIGN) {
-            return buildOperatorCall {
+            return buildAssignmentOperatorStatement {
                 source = baseSource
                 this.operation = operation
                 // TODO: take good psi
-                argumentList = buildBinaryArgumentList(
-                    this@generateAssignment?.convert() ?: buildErrorExpression {
-                        source = null
-                        diagnostic = ConeSimpleDiagnostic(
-                            "Unsupported left value of assignment: ${baseSource?.psi?.text}", DiagnosticKind.ExpressionRequired
-                        )
-                    },
-                    value
-                )
+                leftArgument = this@generateAssignment?.convert() ?: buildErrorExpression {
+                    source = null
+                    diagnostic = ConeSimpleDiagnostic(
+                        "Unsupported left value of assignment: ${baseSource?.psi?.text}", DiagnosticKind.ExpressionRequired
+                    )
+                }
+                rightArgument = value
             }
         }
         require(operation == FirOperation.ASSIGN)
