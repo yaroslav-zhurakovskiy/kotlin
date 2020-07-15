@@ -11361,6 +11361,11 @@ public class FirOldFrontendDiagnosticsTestGenerated extends AbstractFirOldFronte
             public void testReifiedParameterWithRecursiveBound() throws Exception {
                 runTest("compiler/testData/diagnostics/tests/inference/nothingType/reifiedParameterWithRecursiveBound.kt");
             }
+
+            @TestMetadata("specialCallWithMaterializeAndExpectedType.kt")
+            public void testSpecialCallWithMaterializeAndExpectedType() throws Exception {
+                runTest("compiler/testData/diagnostics/tests/inference/nothingType/specialCallWithMaterializeAndExpectedType.kt");
+            }
         }
 
         @TestMetadata("compiler/testData/diagnostics/tests/inference/publicApproximation")
