@@ -11359,6 +11359,11 @@ public class DiagnosticsTestGenerated extends AbstractDiagnosticsTestWithFirVali
                     runTest("compiler/testData/diagnostics/tests/inference/nothingType/nothingWithCallableReference.kt");
                 }
 
+                @TestMetadata("nullableExpectedTypeFromVariable.kt")
+                public void testNullableExpectedTypeFromVariable() throws Exception {
+                    runTest("compiler/testData/diagnostics/tests/inference/nothingType/nullableExpectedTypeFromVariable.kt");
+                }
+
                 @TestMetadata("platformNothingAsUsefulConstraint.kt")
                 public void testPlatformNothingAsUsefulConstraint() throws Exception {
                     runTest("compiler/testData/diagnostics/tests/inference/nothingType/platformNothingAsUsefulConstraint.kt");
