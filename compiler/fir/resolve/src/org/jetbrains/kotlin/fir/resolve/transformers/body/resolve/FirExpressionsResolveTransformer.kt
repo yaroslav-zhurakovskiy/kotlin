@@ -38,6 +38,7 @@ import org.jetbrains.kotlin.fir.types.builder.*
 import org.jetbrains.kotlin.fir.visitors.*
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.Name
+import org.jetbrains.kotlin.types.AbstractTypeChecker
 import org.jetbrains.kotlin.types.Variance
 
 open class FirExpressionsResolveTransformer(transformer: FirBodyResolveTransformer) : FirPartialBodyResolveTransformer(transformer) {
@@ -95,8 +96,36 @@ open class FirExpressionsResolveTransformer(transformer: FirBodyResolveTransform
                         qualifiedAccessExpression.resultType = superTypeRef
                     }
                     !is FirImplicitTypeRef -> {
-                        callee.transformChildren(transformer, ResolutionMode.ContextIndependent)
-                        qualifiedAccessExpression.resultType = callee.superTypeRef
+                        components.typeResolverTransformer.withAllowedBareTypes {
+                            callee.transformChildren(transformer, ResolutionMode.ContextIndependent)
+                        }
+
+                        val actualSuperType = (callee.superTypeRef.coneType as? ConeClassLikeType)
+                            ?.fullyExpandedType(session)?.let { superType ->
+                                val classId = superType.lookupTag.classId
+                                val superTypeRefs = implicitReceiver?.boundSymbol?.phasedFir?.superTypeRefs
+                                val correspondingDeclaredSuperType = superTypeRefs?.firstOrNull {
+                                    it.coneType.fullyExpandedType(session).classId == classId
+                                }?.coneTypeSafe<ConeClassLikeType>()?.fullyExpandedType(session) ?: return@let superType
+
+                                if (superType.typeArguments.isEmpty() && correspondingDeclaredSuperType.typeArguments.isNotEmpty()) {
+                                    superType.withArguments(correspondingDeclaredSuperType.typeArguments)
+                                } else {
+                                    superType
+                                }
+                            }
+                        val actualSuperTypeRef = actualSuperType?.let {
+                            buildResolvedTypeRef {
+                                source = qualifiedAccessExpression.source
+                                type = it
+                            }
+                        } ?: buildErrorTypeRef {
+                            source = qualifiedAccessExpression.source
+                            diagnostic = ConeSimpleDiagnostic("Not a super type", DiagnosticKind.Other)
+                        }
+                        callee.replaceSuperTypeRef(actualSuperTypeRef)
+
+                        qualifiedAccessExpression.resultType = actualSuperTypeRef
                     }
                     else -> {
                         val superTypeRefs = implicitReceiver?.boundSymbol?.phasedFir?.superTypeRefs

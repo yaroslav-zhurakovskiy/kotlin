@@ -13,8 +13,8 @@ interface IDerived<T> : IBase<T> {
 
 class Test : IDerived<String>, IBase<String> {
     fun test() {
-        super<<!QUALIFIED_SUPERTYPE_EXTENDED_BY_OTHER_SUPERTYPE!>IBase<!>>.foo()
-        super<<!QUALIFIED_SUPERTYPE_EXTENDED_BY_OTHER_SUPERTYPE!>IBase<!>>.bar()
+        <!QUALIFIED_SUPERTYPE_EXTENDED_BY_OTHER_SUPERTYPE!>super<IBase><!>.foo()
+        <!QUALIFIED_SUPERTYPE_EXTENDED_BY_OTHER_SUPERTYPE!>super<IBase><!>.bar()
         super<IDerived>.foo()
         super<IDerived>.bar()
         super<IDerived>.qux()
@@ -23,10 +23,10 @@ class Test : IDerived<String>, IBase<String> {
 
 class Test2 : IDerived<String>, AliasedIBase {
     fun test() {
-        super<<!QUALIFIED_SUPERTYPE_EXTENDED_BY_OTHER_SUPERTYPE!>IBase<!>>.foo()
-        super<<!QUALIFIED_SUPERTYPE_EXTENDED_BY_OTHER_SUPERTYPE!>IBase<!>>.bar()
-        super<<!QUALIFIED_SUPERTYPE_EXTENDED_BY_OTHER_SUPERTYPE!>AliasedIBase<!>>.foo()
-        super<<!QUALIFIED_SUPERTYPE_EXTENDED_BY_OTHER_SUPERTYPE!>AliasedIBase<!>>.bar()
+        <!QUALIFIED_SUPERTYPE_EXTENDED_BY_OTHER_SUPERTYPE!>super<IBase><!>.foo()
+        <!QUALIFIED_SUPERTYPE_EXTENDED_BY_OTHER_SUPERTYPE!>super<IBase><!>.bar()
+        <!QUALIFIED_SUPERTYPE_EXTENDED_BY_OTHER_SUPERTYPE!>super<AliasedIBase><!>.foo()
+        <!QUALIFIED_SUPERTYPE_EXTENDED_BY_OTHER_SUPERTYPE!>super<AliasedIBase><!>.bar()
         super<IDerived>.foo()
         super<IDerived>.bar()
         super<IDerived>.qux()
