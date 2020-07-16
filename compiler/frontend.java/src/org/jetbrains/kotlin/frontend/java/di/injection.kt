@@ -96,6 +96,7 @@ fun StorageComponentContainer.configureJavaSpecificComponents(
     languageVersionSettings: LanguageVersionSettings,
     configureJavaClassFinder: (StorageComponentContainer.() -> Unit)?,
     javaClassTracker: JavaClassesTracker?,
+    useJvmBuiltIns: Boolean = true
 ) {
     useImpl<JavaDescriptorResolver>()
     useImpl<DeserializationComponentsForJava>()
@@ -116,8 +117,10 @@ fun StorageComponentContainer.configureJavaSpecificComponents(
 
     useInstance(languageVersionSettings.getFlag(JvmAnalysisFlags.jsr305))
 
-    useInstance((moduleContext.module.builtIns as JvmBuiltIns).settings)
-    useImpl<JvmBuiltInsPackageFragmentProvider>()
+    if (useJvmBuiltIns) {
+        useInstance((moduleContext.module.builtIns as JvmBuiltIns).settings)
+        useImpl<JvmBuiltInsPackageFragmentProvider>()
+    }
 
     useImpl<OptionalAnnotationPackageFragmentProvider>()
 
