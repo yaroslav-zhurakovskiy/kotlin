@@ -17,6 +17,7 @@
 package org.jetbrains.kotlin.resolve.jvm
 
 import org.jetbrains.kotlin.analyzer.*
+import org.jetbrains.kotlin.builtins.jvm.JvmBuiltInsPackageFragmentProvider
 import org.jetbrains.kotlin.config.LanguageVersionSettings
 import org.jetbrains.kotlin.container.get
 import org.jetbrains.kotlin.context.ModuleContext
@@ -107,16 +108,13 @@ class JvmResolverForModuleFactory(
             lookupTracker,
             ExpectActualTracker.DoNothing,
             packagePartProvider,
-            languageVersionSettings,
-            useBuiltInsProvider = false // TODO: load built-ins from module dependencies in IDE
+            languageVersionSettings
         )
 
-        val resolveSession = container.get<ResolveSession>()
-        val javaDescriptorResolver = container.get<JavaDescriptorResolver>()
-
         val providersForModule = arrayListOf(
-            resolveSession.packageFragmentProvider,
-            javaDescriptorResolver.packageFragmentProvider
+            container.get<ResolveSession>().packageFragmentProvider,
+            container.get<JavaDescriptorResolver>().packageFragmentProvider,
+            container.get<JvmBuiltInsPackageFragmentProvider>(),
         )
 
         providersForModule +=

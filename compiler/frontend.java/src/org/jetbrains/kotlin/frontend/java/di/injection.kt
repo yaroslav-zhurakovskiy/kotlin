@@ -62,7 +62,6 @@ fun createContainerForLazyResolveWithJava(
     expectActualTracker: ExpectActualTracker,
     packagePartProvider: PackagePartProvider,
     languageVersionSettings: LanguageVersionSettings,
-    useBuiltInsProvider: Boolean,
     configureJavaClassFinder: (StorageComponentContainer.() -> Unit)? = null,
     javaClassTracker: JavaClassesTracker? = null,
     implicitsResolutionFilter: ImplicitsExtensionsResolutionFilter? = null,
@@ -79,10 +78,7 @@ fun createContainerForLazyResolveWithJava(
 
     useInstance(VirtualFileFinderFactory.getInstance(moduleContext.project).create(moduleContentScope))
 
-    configureJavaSpecificComponents(
-        moduleContext, moduleClassResolver, languageVersionSettings, configureJavaClassFinder,
-        javaClassTracker, useBuiltInsProvider
-    )
+    configureJavaSpecificComponents(moduleContext, moduleClassResolver, languageVersionSettings, configureJavaClassFinder, javaClassTracker)
 
     targetEnvironment.configure(this)
 
@@ -100,7 +96,6 @@ fun StorageComponentContainer.configureJavaSpecificComponents(
     languageVersionSettings: LanguageVersionSettings,
     configureJavaClassFinder: (StorageComponentContainer.() -> Unit)?,
     javaClassTracker: JavaClassesTracker?,
-    useBuiltInsProvider: Boolean
 ) {
     useImpl<JavaDescriptorResolver>()
     useImpl<DeserializationComponentsForJava>()
@@ -121,10 +116,9 @@ fun StorageComponentContainer.configureJavaSpecificComponents(
 
     useInstance(languageVersionSettings.getFlag(JvmAnalysisFlags.jsr305))
 
-    if (useBuiltInsProvider) {
-        useInstance((moduleContext.module.builtIns as JvmBuiltIns).settings)
-        useImpl<JvmBuiltInsPackageFragmentProvider>()
-    }
+    useInstance((moduleContext.module.builtIns as JvmBuiltIns).settings)
+    useImpl<JvmBuiltInsPackageFragmentProvider>()
+
     useImpl<OptionalAnnotationPackageFragmentProvider>()
 
     useInstance(javaClassTracker ?: JavaClassesTracker.Default)
