@@ -505,6 +505,11 @@ public class IrCompileKotlinAgainstKotlinTestGenerated extends AbstractIrCompile
                     KotlinTestUtils.assertAllTestsPresentByMetadataWithExcluded(this.getClass(), new File("compiler/testData/compileKotlinAgainstKotlin/jvm8/defaults/interop"), Pattern.compile("^(.+)\\.kt$"), null, TargetBackend.JVM_IR, true);
                 }
 
+                @TestMetadata("likeMemberClash.kt")
+                public void testLikeMemberClash() throws Exception {
+                    runTest("compiler/testData/compileKotlinAgainstKotlin/jvm8/defaults/interop/likeMemberClash.kt");
+                }
+
                 @TestMetadata("newAndOldSchemes.kt")
                 public void testNewAndOldSchemes() throws Exception {
                     runTest("compiler/testData/compileKotlinAgainstKotlin/jvm8/defaults/interop/newAndOldSchemes.kt");
