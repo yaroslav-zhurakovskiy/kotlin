@@ -51,6 +51,11 @@ object AndroidConfigurationKeys {
     val EXPERIMENTAL = CompilerConfigurationKey.create<String>("enable experimental features")
     val DEFAULT_CACHE_IMPL = CompilerConfigurationKey.create<String>("default cache implementation")
     val FEATURES = CompilerConfigurationKey.create<Set<AndroidExtensionsFeature>>("enabled features")
+    val SYNTHETICS_DEPRECATION_STATUS = CompilerConfigurationKey.create<SyntheticsDeprecationStatus>("synthetics deprecation status")
+}
+
+enum class SyntheticsDeprecationStatus {
+    NONE, WARNING, ERROR
 }
 
 enum class AndroidExtensionsFeature(val featureName: String) {
@@ -73,6 +78,11 @@ class AndroidCommandLineProcessor : CommandLineProcessor {
         val FEATURES_OPTION = CliOption(
                 "features", AndroidExtensionsFeature.values().joinToString(" | "), "Enabled features", required = false)
 
+        val SYNTHETICS_DEPRECATION_STATUS = CliOption(
+            "syntheticsDeprecationStatus", "none/warning/error",
+            "Synthetic ID functionality deprecation status", required = false
+        )
+
         /* This option is just for saving Android Extensions status in Kotlin facet. It should not be supported from CLI. */
         val ENABLED_OPTION: CliOption = CliOption("enabled", "true/false", "Enable Android Extensions", required = false)
     }
@@ -94,6 +104,11 @@ class AndroidCommandLineProcessor : CommandLineProcessor {
                     name -> AndroidExtensionsFeature.values().firstOrNull { it.featureName == name }
                 }
                 configuration.put(AndroidConfigurationKeys.FEATURES, features)
+            }
+            SYNTHETICS_DEPRECATION_STATUS -> {
+                val parsedValue = SyntheticsDeprecationStatus.values().firstOrNull { it.name.toLowerCase() == value }
+                    ?: SyntheticsDeprecationStatus.WARNING
+                configuration.put(AndroidConfigurationKeys.SYNTHETICS_DEPRECATION_STATUS, parsedValue)
             }
             else -> throw CliOptionProcessingException("Unknown option: ${option.optionName}")
         }
@@ -133,8 +148,11 @@ class AndroidComponentRegistrar : ComponentRegistrar {
             IrGenerationExtension.registerExtension(project,
                     CliAndroidIrExtension(isExperimental, globalCacheImpl))
 
+            val deprecationStatus = configuration.get(AndroidConfigurationKeys.SYNTHETICS_DEPRECATION_STATUS)
+                ?: SyntheticsDeprecationStatus.WARNING
+
             StorageComponentContainerContributor.registerExtension(project,
-                    AndroidExtensionPropertiesComponentContainerContributor())
+                    AndroidExtensionPropertiesComponentContainerContributor(deprecationStatus))
 
             ClassBuilderInterceptorExtension.registerExtension(project,
                     CliAndroidOnDestroyClassBuilderInterceptorExtension(globalCacheImpl))
@@ -164,13 +182,15 @@ class AndroidComponentRegistrar : ComponentRegistrar {
     }
 }
 
-class AndroidExtensionPropertiesComponentContainerContributor : StorageComponentContainerContributor {
+class AndroidExtensionPropertiesComponentContainerContributor(
+    val deprecationStatus: SyntheticsDeprecationStatus
+) : StorageComponentContainerContributor {
     override fun registerModuleComponents(
         container: StorageComponentContainer, platform: TargetPlatform, moduleDescriptor: ModuleDescriptor
     ) {
         if (!platform.isJvm()) return
 
-        container.useInstance(AndroidExtensionPropertiesCallChecker())
+        container.useInstance(AndroidExtensionPropertiesCallChecker(deprecationStatus))
         container.useInstance(ParcelableDeclarationChecker())
         container.useInstance(ParcelableAnnotationChecker())
     }

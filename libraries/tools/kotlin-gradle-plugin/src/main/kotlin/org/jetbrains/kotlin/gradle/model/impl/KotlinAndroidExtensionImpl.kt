@@ -14,7 +14,8 @@ import java.io.Serializable
 data class KotlinAndroidExtensionImpl(
     override val name: String,
     override val isExperimental: Boolean,
-    override val defaultCacheImplementation: String?
+    override val defaultCacheImplementation: String?,
+    override val syntheticsDeprecationStatus: String?
 ) : KotlinAndroidExtension, Serializable {
 
     override val modelVersion = serialVersionUID

@@ -22,6 +22,7 @@ import org.jetbrains.kotlin.diagnostics.DiagnosticFactory1;
 import org.jetbrains.kotlin.diagnostics.DiagnosticFactory2;
 import org.jetbrains.kotlin.diagnostics.Errors;
 import org.jetbrains.kotlin.psi.KtClassOrObject;
+import org.jetbrains.kotlin.psi.KtElement;
 import org.jetbrains.kotlin.psi.KtExpression;
 import org.jetbrains.kotlin.types.KotlinType;
 
@@ -33,6 +34,9 @@ public interface ErrorsAndroid {
     DiagnosticFactory1<KtExpression, String> SYNTHETIC_UNRESOLVED_WIDGET_TYPE = DiagnosticFactory1.create(WARNING);
     DiagnosticFactory0<KtExpression> SYNTHETIC_DEPRECATED_PACKAGE = DiagnosticFactory0.create(WARNING);
     DiagnosticFactory0<KtExpression> UNSAFE_CALL_ON_PARTIALLY_DEFINED_RESOURCE = DiagnosticFactory0.create(WARNING);
+
+    DiagnosticFactory0<KtElement> SYNTHETICS_DEPRECATION_WARNING = DiagnosticFactory0.create(WARNING);
+    DiagnosticFactory0<KtElement> SYNTHETICS_DEPRECATION_ERROR = DiagnosticFactory0.create(ERROR);
 
     DiagnosticFactory0<PsiElement> PARCELABLE_SHOULD_BE_CLASS = DiagnosticFactory0.create(ERROR);
     DiagnosticFactory0<PsiElement> PARCELABLE_DELEGATE_IS_NOT_ALLOWED = DiagnosticFactory0.create(ERROR);

@@ -14,6 +14,12 @@ enum class CacheImplementation(val optionName: String) {
     NONE("none")
 }
 
+enum class SyntheticsDeprecationStatus(val optionName: String) {
+    NONE("none"),
+    WARNING("warning"),
+    ERROR("error")
+}
+
 enum class AndroidExtensionsFeature(val featureName: String) {
     VIEWS("views"),
     PARCELIZE("parcelize");
@@ -33,4 +39,6 @@ open class AndroidExtensionsExtension {
     open var features: Set<String> = AndroidExtensionsFeature.values().mapTo(mutableSetOf()) { it.featureName }
 
     open var defaultCacheImplementation: CacheImplementation = CacheImplementation.HASH_MAP
+
+    open var syntheticsDeprecationStatus: SyntheticsDeprecationStatus = SyntheticsDeprecationStatus.WARNING
 }

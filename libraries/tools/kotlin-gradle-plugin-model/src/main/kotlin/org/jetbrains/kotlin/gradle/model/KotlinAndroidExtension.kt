@@ -39,4 +39,11 @@ interface KotlinAndroidExtension {
      * @return the default cache implementation.
      */
     val defaultCacheImplementation: String?
+
+    /**
+     * Return the synthetic view accessors deprecation status.
+     *
+     * @return the synthetic view accessors deprecation status.
+     */
+    val syntheticsDeprecationStatus: String?
 }

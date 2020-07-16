@@ -10,6 +10,7 @@ import com.intellij.testFramework.registerServiceInstance
 import kotlinx.android.extensions.CacheImplementation
 import org.jetbrains.kotlin.android.synthetic.AndroidConfigurationKeys
 import org.jetbrains.kotlin.android.synthetic.AndroidExtensionPropertiesComponentContainerContributor
+import org.jetbrains.kotlin.android.synthetic.SyntheticsDeprecationStatus
 import org.jetbrains.kotlin.android.synthetic.codegen.CliAndroidExtensionsExpressionCodegenExtension
 import org.jetbrains.kotlin.android.synthetic.codegen.CliAndroidIrExtension
 import org.jetbrains.kotlin.android.synthetic.codegen.CliAndroidOnDestroyClassBuilderInterceptorExtension
@@ -42,7 +43,10 @@ fun KtUsefulTestCase.createTestEnvironment(configuration: CompilerConfiguration,
 
     ExpressionCodegenExtension.registerExtension(project, CliAndroidExtensionsExpressionCodegenExtension(true, CacheImplementation.DEFAULT))
     IrGenerationExtension.registerExtension(project, CliAndroidIrExtension(true, CacheImplementation.DEFAULT))
-    StorageComponentContainerContributor.registerExtension(project, AndroidExtensionPropertiesComponentContainerContributor())
+    StorageComponentContainerContributor.registerExtension(
+        project,
+        AndroidExtensionPropertiesComponentContainerContributor(SyntheticsDeprecationStatus.NONE)
+    )
     ClassBuilderInterceptorExtension.registerExtension(
         project, CliAndroidOnDestroyClassBuilderInterceptorExtension(CacheImplementation.DEFAULT)
     )

@@ -17,6 +17,7 @@
 package org.jetbrains.kotlin.android.synthetic.diagnostic
 
 import com.intellij.psi.PsiElement
+import org.jetbrains.kotlin.android.synthetic.SyntheticsDeprecationStatus
 import org.jetbrains.kotlin.android.synthetic.descriptors.AndroidSyntheticPackageFragmentDescriptor
 import org.jetbrains.kotlin.android.synthetic.diagnostic.ErrorsAndroid.*
 import org.jetbrains.kotlin.android.synthetic.res.AndroidSyntheticProperty
@@ -33,7 +34,9 @@ import org.jetbrains.kotlin.resolve.calls.model.ResolvedCall
 import org.jetbrains.kotlin.types.TypeUtils
 import org.jetbrains.kotlin.types.isFlexible
 
-class AndroidExtensionPropertiesCallChecker : CallChecker {
+class AndroidExtensionPropertiesCallChecker(
+    private val deprecationStatus: SyntheticsDeprecationStatus = SyntheticsDeprecationStatus.NONE
+) : CallChecker {
     override fun check(resolvedCall: ResolvedCall<*>, reportOn: PsiElement, context: CallCheckerContext) {
         reportOn as? KtExpression ?: return
 
@@ -43,9 +46,28 @@ class AndroidExtensionPropertiesCallChecker : CallChecker {
 
         with(context.trace) {
             checkUnresolvedWidgetType(reportOn, androidSyntheticProperty)
+            checkAndroidExtensionsDeprecated(reportOn)
             checkDeprecated(reportOn, containingPackage)
             checkPartiallyDefinedResource(resolvedCall, androidSyntheticProperty, context)
         }
+    }
+
+    private var deprecationMessageReported = false
+
+    private fun DiagnosticSink.checkAndroidExtensionsDeprecated(expression: KtExpression) {
+        if (deprecationMessageReported) {
+            return
+        }
+
+        deprecationMessageReported = true
+
+        val diagnosticFactory = when (deprecationStatus) {
+            SyntheticsDeprecationStatus.NONE -> return
+            SyntheticsDeprecationStatus.WARNING -> SYNTHETICS_DEPRECATION_WARNING
+            SyntheticsDeprecationStatus.ERROR -> SYNTHETICS_DEPRECATION_ERROR
+        }
+
+        report(diagnosticFactory.on(expression))
     }
 
     private fun DiagnosticSink.checkDeprecated(expression: KtExpression, packageDescriptor: AndroidSyntheticPackageFragmentDescriptor) {

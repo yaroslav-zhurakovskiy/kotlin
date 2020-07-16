@@ -24,7 +24,12 @@ class KotlinAndroidExtensionModelBuilder : ToolingModelBuilder {
     override fun buildAll(modelName: String, project: Project): Any? {
         if (modelName == KotlinAndroidExtension::class.java.name) {
             val extension = project.extensions.getByType(AndroidExtensionsExtension::class.java)
-            return KotlinAndroidExtensionImpl(project.name, extension.isExperimental, extension.defaultCacheImplementation.optionName)
+            return KotlinAndroidExtensionImpl(
+                project.name,
+                extension.isExperimental,
+                extension.defaultCacheImplementation.optionName,
+                extension.syntheticsDeprecationStatus.optionName
+            )
         }
         return null
     }

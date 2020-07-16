@@ -42,6 +42,18 @@ object DefaultErrorMessagesAndroid : DefaultErrorMessages.Extension {
         MAP.put(ErrorsAndroid.UNSAFE_CALL_ON_PARTIALLY_DEFINED_RESOURCE,
                 "Potential NullPointerException. The resource is missing in some of layout versions")
 
+        MAP.put(
+            ErrorsAndroid.SYNTHETICS_DEPRECATION_WARNING,
+            "Synthetic view accessors are deprecated and will be removed in future. " +
+                    "Use View Binding instead: https://developer.android.com/topic/libraries/view-binding."
+        )
+
+        MAP.put(
+            ErrorsAndroid.SYNTHETICS_DEPRECATION_ERROR,
+            "Synthetic view accessors are deprecated. " +
+                    "Use View Binding instead: https://developer.android.com/topic/libraries/view-binding."
+        )
+
         MAP.put(ErrorsAndroid.PARCELABLE_SHOULD_BE_CLASS,
                 "'Parcelable' should be a class")
 

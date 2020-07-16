@@ -119,6 +119,11 @@ class AndroidSubplugin :
         }
         pluginOptions += SubpluginOption("package", applicationPackage)
 
+        pluginOptions += SubpluginOption(
+            "syntheticsDeprecationStatus",
+            androidExtensionsExtension.syntheticsDeprecationStatus.optionName
+        )
+
         fun addVariant(sourceSet: AndroidSourceSet) {
             val optionValue = lazy {
                 sourceSet.name + ';' + sourceSet.res.srcDirs.joinToString(";") { it.absolutePath }
@@ -174,6 +179,11 @@ class AndroidSubplugin :
         pluginOptions += SubpluginOption(
             "defaultCacheImplementation",
             androidExtensionsExtension.defaultCacheImplementation.optionName
+        )
+
+        pluginOptions += SubpluginOption(
+            "syntheticsDeprecationStatus",
+            androidExtensionsExtension.syntheticsDeprecationStatus.optionName
         )
 
         val mainSourceSet = androidExtension.sourceSets.getByName("main")
